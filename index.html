@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrainSighter</title>
+<style>
+body{font-family:Arial;margin:0;background:#f2f2f2;padding:12px}
+h1{text-align:center}
+input{width:100%;padding:12px;font-size:16px;border-radius:10px;border:1px solid #ccc;box-sizing:border-box;margin-bottom:12px}
+.card{background:white;padding:14px;border-radius:12px;margin-bottom:10px;box-shadow:0 2px 5px #ddd;cursor:pointer}
+.card h3{margin:0}
+.card p{color:#555}
+button{padding:8px 12px;border-radius:8px;border:none;background:#111;color:white;margin:3px;cursor:pointer}
+button.edit{background:#ff9500}
+button.add{background:#007bff;width:100%;padding:12px;font-size:16px;margin-top:10px}
+.back{background:#eee;color:#000}
+.small{color:#777;font-size:13px}
+</style>
+</head>
+<body>
+<h1>🚆 TrainSighter</h1>
+<input id="search" placeholder="🔍 Search railway or locomotive..." oninput="doSearch()">
+<div id="app"></div>
+<script>
+let defaultData={
+"🇬🇧 UK":{LNER:{desc:"London and North Eastern Railway - famous for Flying Scotsman and Mallard.",locos:{ "Flying Scotsman":{desc:"World famous Pacific loco, 4472."},"Mallard":{desc:"World speed record 126mph in 1938."}}},GWR:{desc:"Great Western Railway - God’s Wonderful Railway.",locos:{"King George V":{desc:"King class loco."}}},LMS:{desc:"London Midland and Scottish Railway.",locos:{"Duchess of Hamilton":{desc:"Streamlined Coronation class."}}},Southern:{desc:"Southern Railway - served south coast.",locos:{"Merchant Navy":{desc:"Bulleid Pacific."}}}},
+"🇺🇸 USA":{ "Union Pacific":{desc:"Biggest US railroad.",locos:{"Big Boy":{desc:"Biggest steam loco ever."}}}, "Santa Fe":{desc:"Atchison Topeka and Santa Fe.",locos:{"Super Chief":{desc:"Famous passenger train."}}}},
+"🇦🇺 Australia":{ "NSWGR":{desc:"New South Wales Government Railways.",locos:{"3801":{desc:"Famous Australian Pacific."}}}},
+"🇩🇪 Germany":{ "DB":{desc:"Deutsche Bahn.",locos:{"BR 01":{desc:"German express Pacific."}}}},
+"🇯🇵 Japan":{ "JNR":{desc:"Japanese National Railways.",locos:{"Shinkansen 0":{desc:"First bullet train."}}}},
+"🇫🇷 France":{ "SNCF":{desc:"French National Railways.",locos:{"TGV":{desc:"High speed train."}}}}
+};
+let data=JSON.parse(localStorage.getItem("trains")||JSON.stringify(defaultData));
+let view={country:null,railway:null};
+let searchTerm="";
+function save(){localStorage.setItem("trains",JSON.stringify(data));}
+function doSearch(){searchTerm=document.getElementById("search").value.toLowerCase();render();}
+function render(){
+let app=document.getElementById("app");
+if(searchTerm){
+  let html="<button class='back' onclick='clearSearch()'>⬅ Back</button>";
+  for(let c in data) for(let r in data[c]) for(let l in data[c][r].locos){
+    if(r.toLowerCase().includes(searchTerm)||l.toLowerCase().includes(searchTerm)){
+      html+=`<div class='card' onclick="openLoco('${c}','${r}','${l}')"><h3>${l}</h3><p>${r} - ${c}</p><p>${data[c][r].locos[l].desc}</p></div>`;
+    }
+  }
+  if(html.includes("card")==false) html+="<p>No results</p>";
+  app.innerHTML=html; return;
+}
+if(!view.country){
+  let html="";
+  for(let c in data) html+=`<div class='card' onclick="openCountry('${c}')"><h3>${c}</h3><p>${Object.keys(data[c]).length} railways - Tap to open ➜</p></div>`;
+  html+=`<button class='add' onclick='addCountry()'>➕ Add Country</button>`;
+  app.innerHTML=html; return;
+}
+if(!view.railway){
+  let html=`<button class='back' onclick='goHome()'>⬅ All Countries</button><h2>${view.country}</h2>`;
+  for(let r in data[view.country]){
+    html+=`<div class='card'><h3 onclick="openRailway('${r}')">${r} ➜</h3><p>${data[view.country][r].desc}</p><button class='edit' onclick="editRailway('${r}')">✏️ Edit Railway Description</button></div>`;
+  }
+  html+=`<button class='add' onclick='addRailway()'>➕ Add Railway</button>`;
+  app.innerHTML=html; return;
+}
+let rw=data[view.country][view.railway];
+let html=`<button class='back' onclick='goRailways()'>⬅ Back to ${view.country}</button><h2>${view.railway}</h2><p>${rw.desc}</p>`;
+for(let l in rw.locos){
+  html+=`<div class='card'><h3>${l}</h3><p>${rw.locos[l].desc}</p><button class='edit' onclick="editLoco('${l}')">✏️ Edit Loco Description</button></div>`;
+}
+html+=`<button class='add' onclick='addLoco()'>➕ Add Locomotive</button>`;
+app.innerHTML=html;
+}
+function clearSearch(){searchTerm="";document.getElementById("search").value="";render();}
+function goHome(){view={country:null,railway:null};render();}
+function goRailways(){view.railway=null;render();}
+function openCountry(c){view.country=c;view.railway=null;render();}
+function openRailway(r){view.railway=r;render();}
+function openLoco(c,r,l){view.country=c;view.railway=r;searchTerm="";document.getElementById("search").value="";render();}
+function editRailway(r){let n=prompt("Edit description for "+r, data[view.country][r].desc); if(n!==null){data[view.country][r].desc=n;save();render();}}
+function editLoco(l){let n=prompt("Edit description for "+l, data[view.country][view.railway].locos[l].desc); if(n!==null){data[view.country][view.railway].locos[l].desc=n;save();render();}}
+function addCountry(){let n=prompt("New country name? e.g. 🇮🇹 Italy"); if(n){data[n]={};save();render();}}
+function addRailway(){let n=prompt("New railway name?"); if(!n) return; let d=prompt("Railway description?")||"New railway"; data[view.country][n]={desc:d,locos:{}};save();render();}
+function addLoco(){let n=prompt("New locomotive name?"); if(!n) return; let d=prompt("Locomotive description?")||"New loco"; data[view.country][view.railway].locos[n]={desc:d};save();render();}
+render();
+</script>
+</body>
+</html>
