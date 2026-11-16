@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrainSighter - Sydney</title>
+<style>
+body{font-family:system-ui;background:#0f172a;color:white;margin:0;padding:16px}
+h1{margin:4px 0} p{color:#94a3b8}
+.card{background:#1e293b;padding:16px;border-radius:16px;margin:12px 0}
+input,select,button{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:0;font-size:16px;box-sizing:border-box}
+button{background:#f59e0b;font-weight:800}
+.sighting{background:white;color:#111;padding:12px;border-radius:12px;margin:8px 0}
+.tag{background:#fef3c7;padding:3px 8px;border-radius:20px;font-size:12px}
+</style>
+</head>
+<body>
+<h1>🚆 TrainSighter</h1>
+<p>Spot it. Log it. Share it. - Sydney</p>
+
+<div class="card">
+<h3>+ Log a Sighting</h3>
+<select id="line">
+<option>T1 North Shore & Western</option>
+<option>T2 Inner West & Leppington</option>
+<option>T3 Liverpool & Inner West</option>
+<option>T4 Eastern Suburbs & Illawarra</option>
+<option>T8 Airport & South</option>
+<option>T9 Northern</option>
+<option>M1 Metro North West & Bankstown</option>
+<option>Other / Heritage</option>
+</select>
+<input id="station" placeholder="Station - e.g. Central, Strathfield">
+<input id="train" placeholder="Train type - e.g. Waratah, Tangara">
+<input id="note" placeholder="Note - e.g. 8 cars, nice horn!">
+<button onclick="add()">Log Sighting 🚆</button>
+</div>
+
+<div id="list"></div>
+
+<script>
+let data = JSON.parse(localStorage.getItem('trains')||'[]');
+function show(){
+  document.getElementById('list').innerHTML = '<h3>Recent Sightings ('+data.length+')</h3>' + data.map(s=>`<div class="sighting"><b>${s.line}</b> <span class="tag">${s.time}</span><br>📍 ${s.station} - ${s.train}<br>${s.note}</div>`).join('') || '<p>No sightings yet - be the first!</p>';
+}
+function add(){
+  let s={line:line.value,station:station.value||'Unknown Station',train:train.value||'Unknown Train',note:note.value,time:new Date().toLocaleString()};
+  data.unshift(s); localStorage.setItem('trains',JSON.stringify(data)); show();
+  station.value=''; train.value=''; note.value=''; alert('Logged! 🎉');
+}
+show();
+</script>
+</body>
+</html>
