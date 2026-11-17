@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrainSighter</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial;margin:0;background:#0f0f0f;color:white;padding:12px}
+h1{text-align:center;margin:8px 0}
+button{padding:11px 14px;border-radius:10px;border:none;background:#e63946;color:white;font-weight:bold;margin:4px 0;cursor:pointer;width:100%}
+button.ghost{background:#222;border:1px solid #444}
+button.small{width:auto;padding:8px 12px}
+.card{background:#1e1e1e;padding:16px;border-radius:14px;margin-bottom:10px;border:1px solid #333;cursor:pointer}
+.card img{width:100%;border-radius:10px;max-height:220px;object-fit:cover}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:bold;color:white}
+.Active{background:#00b894}.Defunct{background:#636e72}.Preserved{background:#0984e3}.Scrapped{background:#d63031}.Museum{background:#e17055}.Steam{background:#e17055}.Electric{background:#0984e3}.Diesel{background:#fdcb6e;color:#111}
+.spec{background:#2a2a2a;padding:12px;border-radius:10px;margin:8px 0;line-height:1.7}
+input,select,textarea{width:100%;padding:11px;border-radius:10px;border:1px solid #444;background:#222;color:white;margin:6px 0}
+label{font-size:13px;color:#aaa}
+#formBox{background:#1e1e1e;padding:14px;border-radius:14px;border:1px solid #444;display:none;margin-bottom:12px}
+.topbar{display:flex;gap:6px}
+.topbar button{width:auto}
+.search{position:sticky;top:0;z-index:5;background:#0f0f0f;padding:6px 0}
+</style>
+</head>
+<body>
+<h1 id="title">🚆 TrainSighter</h1>
+<div class="topbar"><button class="ghost small" onclick="go('home')">🏠 Home</button><button class="ghost small" onclick="go('home')">⬅ Back</button></div>
+<div id="app"></div>
+<div id="formBox"></div>
+<script>
+let DATA = JSON.parse(localStorage.getItem('ts_data')||'null') || {
+ UK:{name:"🇬🇧 UK", railways:[
+  {name:"LNER", years:"1923-1948", desc:"London and North Eastern Railway", status:"Defunct", locos:[
+   {model:"A3 Class", name:"Flying Scotsman", number:"4472", speed:"100 mph
