@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrainSighter</title>
+<style>
+body{font-family:Arial;margin:0;background:#0f0f0f;color:white;padding:12px}
+button{padding:12px;border-radius:10px;border:none;background:#e63946;color:white;font-weight:bold;margin:4px 0;cursor:pointer;width:100%}
+button.ghost{background:#222;border:1px solid #444}
+button.small{width:auto;padding:8px 12px}
+.card{background:#1e1e1e;padding:16px;border-radius:14px;margin-bottom:10px;border:1px solid #333;cursor:pointer}
+.card img{width:100%;border-radius:10px;max-height:220px;object-fit:cover}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:bold;color:white}
+.Active{background:#00b894}.Defunct{background:#636e72}.Preserved{background:#0984e3}.Scrapped{background:#d63031}.Museum{background:#e17055}.Steam{background:#e17055}.Electric{background:#0984e3}.Diesel{background:#fdcb6e;color:#111}
+.spec{background:#2a2a2a;padding:12px;border-radius:10px;margin:8px 0;line-height:1.7}
+input,select,textarea{width:100%;padding:11px;border-radius:10px;border:1px solid #444;background:#222;color:white;margin:6px 0}
+#formBox{background:#1e1e1e;padding:14px;border-radius:14px;border:1px solid #444;display:none;margin-bottom:12px}
+.topbar{display:flex;gap:6px}
+</style>
+</head>
+<body>
+<h1>🚆 TrainSighter</h1>
+<div class="topbar"><button class="ghost small" onclick="goHome()">🏠 Home</button><button class="ghost small" onclick="goBack()">⬅ Back</button></div>
+<div id="app"><p>Loading...</p></div>
+<div id="formBox"></div>
+<script>
+// SAFE SAVE - will not crash even if browser blocks it
+function loadData(){
+  try{ let s=localStorage.getItem('ts_data'); if(s) return JSON.parse(s); }catch(e){}
+  return null;
+}
+function saveData(){
+  try{ localStorage.setItem('ts_data', JSON.stringify(DATA)); }catch(e){}
+}
+var DATA = loadData() || {
+ UK:{name:"🇬🇧 UK", railways:[
+  {name:"LNER", years:"1923-1948", desc:"London and North Eastern Railway", status:"Defunct", locos:[
+   {model:"A3 Class", name:"Flying Scotsman", number:"4472", speed:"100 mph", weight:"96 tons", wheel:"4-6-2", type:"Steam", status:"Preserved", img:"", note:"First loco to reach 100mph"},
+   {model:"A4 Class", name:"Mallard", number:"4468", speed:"126 mph", weight:"102 tons", wheel:"4-6-2", type:"Steam", status:"Museum", img:"", note:"World steam speed record"}
+  ]},
+  {name:"GWR", years:"1835-1948", desc:"Great Western Railway", status:"Defunct", locos:[
+   {model:"Castle Class", name:"Caerphilly Castle", number:"4073", speed:"100 mph", weight:"80 tons", wheel:"4-6-0", type:"Steam", status:"Preserved", img:"", note:"Preserved"}
+  ]}
+ ]},
+ USA:{name:"🇺🇸 USA", railways:[
+  {name:"Union Pacific", years:"1862-Present", desc:"Largest US railroad", status:"Active", locos:[
+   {model:"Big Boy", name:"Big Boy", number:"4014", speed:"80 mph", weight:"350 tons", wheel:"4-8-8-4", type:"Steam", status:"Active", img:"", note:"Restored"}
+  ]}
+ ]},
+ AU:{name:"🇦🇺 Australia", railways:[
+  {name:"NSWGR", years:"1855-Present", desc:"New South Wales Government Railways", status:"Active", locos:[
+   {model:"C38 Class", name:"3801", number:"3801", speed:"70 mph", weight:"100 tons", wheel:"4-6-2", type:"Steam", status:"Preserved", img:"", note:"Most famous Aussie loco"}
+  ]}
+ ]},
+ JP:{name:"🇯🇵 Japan", railways:[
+  {name:"JNR", years:"1949-1987", desc:"Japanese National Railways", status:"Defunct", locos:[
+   {model:"Shinkansen 0", name:"0 Series", number:"0", speed:"137 mph", weight:"80 tons", wheel:"Bo-Bo", type:"Electric", status:"Museum", img:"", note:"First bullet train"}
+  ]}
+ ]}
+};
+var curCountry=null, curRailway=-1, curLoco=-1, curPage='home', searchText='';
+function goHome(){curPage='home';curCountry=null;curRailway=-1;render();}
+function goBack(){if(curPage=='loco'){curPage='railway';}else if(curPage=='railway'){curPage='country';}else if(curPage=='country'){curPage='home';}else{curPage='home';}render();}
+function badge(s){return '<span class="badge '+s+'">'+s+'</span>';}
+function render(){
+ var a=document.getElementById('app'); document.getElementById('formBox').style.display='none';
+ if(curPage=='home'){
+  var html='<p style="text-align:center;color:#aaa">Tap a country to see its railways</p>';
+  for(var k in DATA){ html+='<div class="card" onclick="openCountry(\''+k+'\')"><h2>'+DATA[k].name+'</h2><p style="color:#aaa">'+DATA[k].railways.length+' railways - Tap to open</p></div>'; }
+  a.innerHTML=html;
+ }
+ if(curPage=='country'){
+  var c=DATA[curCountry]; var html='<h2>'+c.name+'</h2><button onclick="showAddRailway()">➕ Add Railway</button>';
+  for(var i=0;i<c.railways.length;i++){ var r=c.railways[i]; html+='<div class="card" onclick="openRailway('+i+')"><h3>'+r.name+' '+badge(r.status)+'</h3><p><b>'+r.years+'</b></p><p style="color:#ccc">'+r.desc+'</p><p style="color:#aaa">'+r.locos.length+' locomotives</p></div>'; }
+  a.innerHTML=html;
+ }
+ if(curPage=='railway'){
+  var r=DATA[curCountry].railways[curRailway];
+  var html='<h2>'+r.name+' '+badge(r.status)+'</h2><p><b>'+r.years+'</b> - '+r.desc+'</p><input id="q" placeholder="🔍 Search fleet roster..." value="'+searchText+'" oninput="searchText=this.value;renderListOnly()"><button onclick="showAddLoco()">➕ Add Locomotive</button><h3>Fleet Roster - Grouped by Model</h3><div id="list"></div>';
+  a.innerHTML=html; renderListOnly();
+ }
+ if(curPage=='loco'){
+  var l=DATA[curCountry].railways[curRailway].locos[curLoco];
+  var imgHtml = l.img ? '<img src="'+l.img+'">' : '<p style="color:#aaa">No image yet - add one below!</p>';
+  a.innerHTML='<div class="card">'+imgHtml+'<h2>'+l.name+' #'+l.number+'</h2><p>'+l.model+' '+badge(l.type)+' '+badge(l.status)+'</p><div class="spec"><b>Top Speed:</b> '+l.speed+'<br><b>Weight:</b> '+l.weight+'<br><b>Wheel Arrangement:</b> '+l.wheel+'<br><b>Status:</b> '+l.status+'<br><b>Note:</b> '+l.note+'</div></div><h3>🖼️ Add Image</h3><div class="card"><p>Paste Image Link</p><input id="imgUrl" placeholder="https://..."><button onclick="saveImg()">Save Image</button><p>Or pick from phone</p><input type="file" accept="image/*" onchange="fileImg(event)"></div>';
+ }
+}
+function renderListOnly(){
+ var box=document.getElementById('list'); if(!box) return;
+ var r=DATA[curCountry].railways[curRailway];
+ var q=searchText.toLowerCase();
+ var html='';
+ var groups={};
+ for(var i=0;i<r.locos.length;i++){ var l=r.locos[i]; if((l.name+' '+l.model+' '+l.number).toLowerCase().indexOf(q)==-1) continue; if(!groups[l.model]) groups[l.model]=[]; groups[l.model].push({l:l,idx:i}); }
+ for(var m in groups){ html+='<h3 style="background:#222;padding:10px;border-radius:10px">'+m+' ('+groups[m].length+')</h3>'; for(var j=0;j<groups[m].length;j++){ var o=groups[m][j]; var im=o.l.img?'<img src="'+o.l.img+'">':''; html+='<div class="card" onclick="openLoco('+o.idx+')">'+im+'<h3>'+o.l.name+' #'+o.l.number+' '+badge(o.l.status)+'</h3><p>'+o.l.model+' '+badge(o.l.type)+'</p><p style="color:#aaa">'+o.l.speed+' - '+o.l.weight+' - '+o.l.wheel+'</p></div>'; } }
+ if(html=='') html='<p>No locos found.</p>';
+ box.innerHTML=html;
+}
+function openCountry(k){curCountry=k;curPage='country';render();}
+function openRailway(i){curRailway=i;curPage='railway';searchText='';render();}
+function openLoco(i){curLoco=i;curPage='loco';render();}
+function showAddRailway(){
+ var f=document.getElementById('formBox'); f.style.display='block';
+ f.innerHTML='<h3>➕ Add Railway</h3><p>Name</p><input id="rn" placeholder="e.g. Southern"><p>Years</p><input id="ry" placeholder="e.g. 1923-1948"><p>Description</p><textarea id="rd" placeholder="What did this railway do?"></textarea><p>Status</p><select id="rs"><option>Active</option><option>Defunct</option></select><button onclick="doAddRailway()">Save Railway</button><button class="ghost" onclick="document.getElementById(\'formBox\').style.display=\'none\'">Cancel</button>';
+}
+function doAddRailway(){
+ var n=document.getElementById('rn').value; if(!n){alert('Type a name!');return;}
+ DATA[curCountry].railways.push({name:n,years:document.getElementById('ry').value||'Unknown',desc:document.getElementById('rd').value||'',status:document.getElementById('rs').value,locos:[]}); saveData(); render();
+}
+function showAddLoco(){
+ var f=document.getElementById('formBox'); f.style.display='block';
+ f.innerHTML='<h3>➕ Add Locomotive</h3><p>Model / Class</p><input id="lm" placeholder="e.g. A4 Class"><p>Name</p><input id="ln" placeholder="e.g. Mallard"><p>Number</p><input id="lnum" placeholder="4468"><p>Top Speed</p><input id="ls" placeholder="126 mph"><p>Weight</p><input id="lw" placeholder="102 tons"><p>Wheel Arrangement</p><input id="lwh" placeholder="4-6-2"><p>Type</p><select id="lt"><option>Steam</option><option>Diesel</option><option>Electric</option></select><p>Status</p><select id="lst"><option>Active</option><option>Preserved</option><option>Museum</option><option>Scrapped</option></select><p>Image Link</p><input id="li" placeholder="https://..."><p>Note</p><input id="lno" placeholder="Famous for..."><button onclick="doAddLoco()">Save Locomotive</button><button class="ghost" onclick="document.getElementById(\'formBox\').style.display=\'none\'">Cancel</button>';
+}
+function doAddLoco(){
+ DATA[curCountry].railways[curRailway].locos.push({model:document.getElementById('lm').value||'Unknown',name:document.getElementById('ln').value||'Unnamed',number:document.getElementById('lnum').value||'',speed:document.getElementById('ls').value||'',weight:document.getElementById('lw').value||'',wheel:document.getElementById('lwh').value||'',type:document.getElementById('lt').value,status:document.getElementById('lst').value,img:document.getElementById('li').value||'',note:document.getElementById('lno').value||''}); saveData(); render();
+}
+function saveImg(){
+ var v=document.getElementById('imgUrl').value; if(!v){alert('Paste a link first');return;}
+ DATA[curCountry].railways[curRailway].locos[curLoco].img=v; saveData(); render();
+}
+function fileImg(e){
+ var file=e.target.files[0]; if(!file) return;
+ var reader=new FileReader(); reader.onload=function(ev){ DATA[curCountry].railways[curRailway].locos[curLoco].img=ev.target.result; saveData(); render(); }; reader.readAsDataURL(file);
+}
+render();
+</script>
+</body>
+</html>
