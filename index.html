@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrainSighter</title>
+<style>
+body{font-family:Arial;margin:0;background:#f2f2f2;padding:12px}
+h1{text-align:center}
+input{width:100%;padding:12px;font-size:16px;border-radius:10px;border:1px solid #ccc;box-sizing:border-box;margin-bottom:12px}
+.card{background:white;padding:14px;border-radius:12px;margin-bottom:10px;box-shadow:0 2px 5px #ddd;cursor:pointer}
+button{padding:8px 12px;border-radius:8px;border:none;background:#111;color:white;margin:3px;cursor:pointer}
+button.edit{background:#ff9500}
+button.photo{background:#00b894}
+button.add{background:#007bff;width:100%;padding:12px;font-size:16px;margin-top:10px}
+button.tab{background:#ddd;color:#000}
+button.tab.on{background:#111;color:#fff}
+.back{background:#eee;color:#000}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold;color:white}
+.Active{background:#00b894}.Historic{background:#888}.Steam{background:#e17055}.Diesel{background:#2d3436}.Electric{background:#0984e3}
+img.hero{width:100%;border-radius:12px;max-height:300px;object-fit:cover}
+img.thumb{width:90px;height:60px;object-fit:cover;border-radius:8px;float:right}
+img.gal{width:100%;border-radius:10px;max-height:220px;object-fit:cover;margin-bottom:8px}
+table{width:100%;border-collapse:collapse;background:white}
+td,th{padding:8px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
+.notable{background:#ffeaa7;padding:12px;border-radius:10px;margin:10px 0}
+.spec{background:white;padding:10px;border-radius:10px;margin:5px 0}
+.clear{clear:both}
+</style>
+</head>
+<body>
+<h1>🚆 TrainSighter</h1>
+<input id="search" placeholder="🔍 Search railway or class..." oninput="doSearch()">
+<div id="app">Loading...</div>
+<script>
+let data = {};
+function mkClass(desc,power,years,weight,top,wheel,notable){
+return {desc:desc,power:power,years:years,weight:weight,top:top,wheel:wheel,notable:notable,img:"",gallery:[],roster:[]};
+}
+function mkRail(desc,years,status){
+return {desc:desc,years:years,status:status,logo:"",classes:{}};
+}
+function buildDefault(){
+let d = {};
+d["🇬🇧 UK"] = {railways:{}};
+d["🇬🇧 UK"].railways["LNER"] = mkRail("London and North Eastern Railway - famous for Flying Scotsman and Mallard.","1923-1948","Historic");
+d["🇬🇧 UK"].railways["LNER"].classes["A3 Class"] = mkClass("World famous Pacific class. Flying Scotsman is the most famous.","Steam","1922-1935","96 tons","100 mph","4-6-2","⭐ 4472 Flying Scotsman - First loco to officially reach 100mph!");
+d["🇬🇧 UK"].railways["LNER"].classes["A3 Class"].roster = [{n:"4472",name:"Flying Scots
