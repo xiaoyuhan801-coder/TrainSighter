@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrainSighter</title>
+<style>
+body{font-family:Arial;margin:0;background:#f2f2f2;padding:12px}
+h1{text-align:center}
+.card{background:white;padding:16px;border-radius:12px;margin-bottom:10px;cursor:pointer}
+button{padding:10px 14px;border-radius:8px;border:none;background:#111;color:white;margin:3px;cursor:pointer}
+.back{background:#ddd;color:#000}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold;color:white}
+.Active{background:#00b894}.Historic{background:#888}.Steam{background:#e17055}.Diesel{background:#2d3436}.Electric{background:#0984e3}
+input{width:100%;padding:12px;font-size:16px;border-radius:10px;border:1px solid #ccc;box-sizing:border-box;margin-bottom:12px}
+img.hero{width:100%;border-radius:12px}
+.spec{background:white;padding:12px;border-radius:10px;margin:8px 0}
+.notable{background:#ffeaa7;padding:12px;border-radius:10px}
+table{width:100%;border-collapse:collapse;background:white}
+td,th{padding:8px;border-bottom:1px solid #eee;text-align:left}
+</style>
+</head>
+<body>
+<h1>🚆 TrainSighter</h1>
+<div id="app"></div>
+<script>
+let page = "home";
+let country = "";
+let railway = "";
+let cls = "";
+function show(){
+let a = document.getElementById("app");
+if(page=="home"){
+a.innerHTML = "<div class='card' onclick=\"country='UK';page='country';show()\"><h3>🇬🇧 UK</h3><p>3 railways - Tap to open</p></div>" +
+"<div class='card' onclick=\"country='USA';page='country';show()\"><h3>🇺🇸 USA</h3><p>1 railway - Tap to open</p></div>" +
+"<div class='card' onclick=\"country='Australia';page='country';show()\"><h3>🇦🇺 Australia</h3><p>1 railway - Tap to open</p></div>" +
+"<div class='card' onclick=\"country='Japan';page='country';show()\"><h3>🇯🇵 Japan</h3><p>1 railway - Tap to open</p></div>";
+}
+if(page=="country"){
+let html = "<button class='back' onclick=\"page='home';show()\">Back</button><h2>"+country+"</h2>";
+if(country=="UK"){
+html += "<div class='card' onclick=\"railway='LNER';page='railway';show()\"><h3>LNER</h3><p>1923-1948 <span class='badge Historic'>Historic</span></p><p>London and North Eastern Railway - Flying Scotsman and Mallard</p></div>";
+html += "<div class='card' onclick=\"railway='GWR';page='railway';show()\"><h3>GWR</h3><p>1835-1948 <span class='badge Historic'>Historic</span></p><p>Great Western Railway</p></div>";
+html += "<div class='card' onclick=\"railway='LMS';page='railway';show()\"><h3>LMS</h3><p>1923-1948 <span class='badge Historic'>Historic</span></p><p>London Midland and Scottish Railway</p></div>";
+}
+if(country=="USA"){
+html += "<div class='card' onclick=\"railway='Union Pacific';page='railway';show()\"><h3>Union Pacific</h3><p>1862-Present <span class='badge Active'>Active</span></p><p>Biggest US railroad</p></div>";
+}
+if(country=="Australia"){
+html += "<div class='card' onclick=\"railway='NSWGR';page='railway';show()\"><h3>NSWGR</h3><p>1855-Present <span class='badge Active'>Active</span></p><p>New South Wales Government Railways</p></div>";
+}
+if(country=="Japan"){
+html += "<div class='card' onclick=\"railway='JNR';page='railway';show()\"><h3>JNR</h3><p>1949-1987 <span class='badge Historic'>Historic</span></p><p>Japanese National Railways</p></div>";
+}
+a.innerHTML = html;
+}
+if(page=="railway"){
+let html = "<button class='back' onclick=\"page='country';show()\">Back</button><h2>"+railway+"</h2>";
+if(railway=="LNER"){
+html += "<div class='card' onclick=\"cls='A3';page='class';show()\"><h3>A3 Class</h3><p><span class='badge Steam'>Steam</span> 1922-1935</p><p>Flying Scotsman!</p></div>";
+html += "<div class='card' onclick=\"cls='A4';page='class';show()\"><h3>A4 Class</h3><p><span class='badge Steam'>Steam</span> 1935-1938</p><p>Mallard - fastest steam loco ever!</p></div>";
+}
+if(railway=="GWR"){
+html += "<div class='card' onclick=\"cls='Castle';page='class';show()\"><h3>Castle Class</h3><p><span class='badge Steam'>Steam</span> 1923-1950</p></div>";
+}
+if(railway=="LMS"){
+html += "<div class='card' onclick=\"cls='Coronation';page='class';show()\"><h3>Coronation Class</h3><p><span class='badge Steam'>Steam</span> 1937-1948</p></div>";
+}
+if(railway=="Union Pacific"){
+html += "<div class='card' onclick=\"cls='BigBoy';page='class';show()\"><h3>Big Boy</h3><p><span class='badge Steam'>Steam</span> 1941-1944</p></div>";
+}
+if(railway=="NSWGR"){
+html += "<div class='card' onclick=\"cls='C38';page='class';show()\"><h3>C38 Class</h3><p><span class='badge Steam'>Steam</span> 1943-1949</p><p>3801 - Famous Aussie loco!</p></div>";
+}
+if(railway=="JNR"){
+html += "<div class='card' onclick=\"cls='Shinkansen
